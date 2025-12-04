@@ -8,6 +8,10 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 
 
 def get_db():
+    """
+    Devuelve una sesión de base de datos por petición.
+    Hecho por un estudiante: abre la conexión y se asegura de cerrarla.
+    """
     db = SessionLocal()
     try:
         yield db
@@ -17,18 +21,27 @@ def get_db():
 
 @router.post("/", response_model=CategoryRead, status_code=201)
 def create_category(payload: CategoryCreate, db: Session = Depends(get_db)):
+    """
+    Crea una nueva categoría con el nombre enviado.
+    """
     service = CategoryService(db)
     return service.create(name=payload.name)
 
 
 @router.get("/", response_model=list[CategoryRead])
 def list_categories(db: Session = Depends(get_db)):
+    """
+    Lista todas las categorías guardadas.
+    """
     service = CategoryService(db)
     return service.list()
 
 
 @router.delete("/{category_id}", status_code=204)
 def delete_category(category_id: int, db: Session = Depends(get_db)):
+    """
+    Borra una categoría por su id. Si no existe, devuelve 404.
+    """
     service = CategoryService(db)
     ok = service.delete(category_id)
     if not ok:

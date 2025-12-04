@@ -10,18 +10,22 @@ if config.config_file_name is not None:
 # Override URL from environment
 section = config.get_section(config.config_ini_section)
 section["sqlalchemy.url"] = (
-    f"mysql+pymysql://{os.getenv('DB_USER','root')}:{os.getenv('DB_PASSWORD','')}@"
-    f"{os.getenv('DB_HOST','127.0.0.1')}:{os.getenv('DB_PORT','3306')}/"
-    f"{os.getenv('DB_NAME','inventario')}"
+    f"mysql+pymysql://{os.getenv('DB_USER', 'root')}:"
+    f"{os.getenv('DB_PASSWORD', '')}@"
+    f"{os.getenv('DB_HOST', '127.0.0.1')}:"
+    f"{os.getenv('DB_PORT', '3306')}/"
+    f"{os.getenv('DB_NAME', 'inventario')}"
 )
 
 target_metadata = None
+
 
 def run_migrations_offline():
     url = config.get_main_option("sqlalchemy.url")
     context.configure(url=url, literal_binds=True, compare_type=True)
     with context.begin_transaction():
         context.run_migrations()
+
 
 def run_migrations_online():
     connectable = engine_from_config(
@@ -38,6 +42,7 @@ def run_migrations_online():
             context.run_migrations()
             if connection.dialect.name == "mysql":
                 connection.exec_driver_sql("SET FOREIGN_KEY_CHECKS=1;")
+
 
 if context.is_offline_mode():
     run_migrations_offline()

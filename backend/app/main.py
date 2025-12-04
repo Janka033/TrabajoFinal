@@ -5,8 +5,13 @@ from app.api.categories import router as categories_router
 from app.api.products import router as products_router
 
 app = FastAPI()
+"""
+Aplicación principal FastAPI del proyecto.
+Hecha por un estudiante: configura CORS, crea tablas,
+expone un endpoint de salud y registra los routers.
+"""
 
-# CORS para permitir frontend (incluye file:// y orígenes múltiples)
+# CORS para permitir el frontend (incluye file:// y varios orígenes)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

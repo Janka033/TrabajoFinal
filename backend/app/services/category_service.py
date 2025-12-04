@@ -3,6 +3,11 @@ from app.models.category import Category
 
 
 class CategoryService:
+    """
+    Servicio para manejar categorías.
+    Hecho por un estudiante: crea, lista, busca y borra categorías
+    usando la base de datos con SQLAlchemy.
+    """
     def __init__(self, db: Session):
         self.db = db
 

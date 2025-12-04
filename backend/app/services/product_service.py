@@ -3,6 +3,11 @@ from app.models.product import Product
 
 
 class ProductService:
+    """
+    Servicio para manejar productos.
+    Hecho por un estudiante: permite crear, listar, obtener,
+    actualizar y borrar productos en la base de datos.
+    """
     def __init__(self, db: Session):
         self.db = db
 

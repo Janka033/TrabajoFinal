@@ -4,6 +4,11 @@ from app.core import Base
 
 
 class Product(Base):
+    """
+    Clase que representa un producto del inventario.
+    Hecha por un estudiante: tiene nombre, descripción,
+    precio, stock y a qué categoría pertenece.
+    """
     __tablename__ = "products"
     id: Mapped[int] = mapped_column(
         Integer,

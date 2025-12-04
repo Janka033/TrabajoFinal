@@ -4,6 +4,11 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 
 def _build_db_url_from_env() -> str | None:
+    """
+    Construye la URL de la base de datos leyendo variables de entorno.
+    Hecho por un estudiante: intenta usar MySQL (XAMPP) y si no,
+    se queda con SQLite como respaldo para pruebas.
+    """
     host = os.getenv("DB_HOST")
     port = os.getenv("DB_PORT")
     user = os.getenv("DB_USER")
@@ -18,7 +23,7 @@ def _build_db_url_from_env() -> str | None:
 
 DATABASE_URL = os.getenv("DATABASE_URL") or _build_db_url_from_env()
 
-# Fallback a SQLite si no se define DATABASE_URL ni variables MySQL
+# Respaldo a SQLite si no se define DATABASE_URL ni variables MySQL
 if not DATABASE_URL:
     DATABASE_URL = "sqlite:///./ci.db"
 

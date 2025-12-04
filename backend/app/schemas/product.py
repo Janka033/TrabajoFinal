@@ -3,6 +3,7 @@ from pydantic import ConfigDict
 
 
 class ProductCreate(BaseModel):
+    """Datos para crear un producto."""
     name: str
     description: str | None = None
     price: float = Field(gt=0)
@@ -11,6 +12,7 @@ class ProductCreate(BaseModel):
 
 
 class ProductUpdate(BaseModel):
+    """Datos para actualizar un producto (todos opcionales)."""
     name: str | None = None
     description: str | None = None
     price: float | None = Field(default=None, gt=0)
@@ -19,6 +21,7 @@ class ProductUpdate(BaseModel):
 
 
 class ProductRead(BaseModel):
+    """Datos que se devuelven al leer un producto."""
     id: int
     name: str
     description: str | None
@@ -26,5 +29,5 @@ class ProductRead(BaseModel):
     stock: int
     category_id: int
 
-    # Pydantic v2 config
+    # Configuración de Pydantic v2 para leer desde objetos ORM
     model_config = ConfigDict(from_attributes=True)

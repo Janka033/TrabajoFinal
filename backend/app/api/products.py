@@ -8,6 +8,10 @@ router = APIRouter(prefix="/products", tags=["products"])
 
 
 def get_db():
+    """
+    Devuelve una sesión de base de datos por petición.
+    Hecho por un estudiante: abre y cierra la conexión correctamente.
+    """
     db = SessionLocal()
     try:
         yield db
@@ -17,18 +21,27 @@ def get_db():
 
 @router.post("/", response_model=ProductRead, status_code=201)
 def create_product(payload: ProductCreate, db: Session = Depends(get_db)):
+    """
+    Crea un producto usando los datos enviados.
+    """
     service = ProductService(db)
     return service.create(**payload.model_dump())
 
 
 @router.get("/", response_model=list[ProductRead])
 def list_products(db: Session = Depends(get_db)):
+    """
+    Lista todos los productos guardados.
+    """
     service = ProductService(db)
     return service.list()
 
 
 @router.get("/{product_id}", response_model=ProductRead)
 def get_product(product_id: int, db: Session = Depends(get_db)):
+    """
+    Obtiene un producto por su id o devuelve 404 si no existe.
+    """
     service = ProductService(db)
     prod = service.get(product_id)
     if not prod:
@@ -45,6 +58,9 @@ def update_product(
     payload: ProductUpdate,
     db: Session = Depends(get_db),
 ):
+    """
+    Actualiza un producto por id con los datos enviados.
+    """
     service = ProductService(db)
     prod = service.update(
         product_id,
@@ -60,6 +76,9 @@ def update_product(
 
 @router.delete("/{product_id}", status_code=204)
 def delete_product(product_id: int, db: Session = Depends(get_db)):
+    """
+    Borra un producto por su id. Si no existe, devuelve 404.
+    """
     service = ProductService(db)
     ok = service.delete(product_id)
     if not ok:
