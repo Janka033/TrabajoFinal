@@ -1,5 +1,6 @@
 [
   "backend/tests/test_api_integration.py::test_flow_create_category_and_product_listing",
   "backend/tests/test_services.py::test_category_crud",
-  "backend/tests/test_services.py::test_product_crud"
+  "backend/tests/test_services.py::test_product_crud",
+  "e2e/test_e2e_playwright.py::test_e2e_create_category_product_and_list"
 ]
