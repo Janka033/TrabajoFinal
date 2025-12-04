@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.category import Category
 
+
 class CategoryService:
     def __init__(self, db: Session):
         self.db = db
