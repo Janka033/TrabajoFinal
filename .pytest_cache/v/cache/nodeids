@@ -1,6 +1,22 @@
 [
+  "backend/tests/test_api_integration.py::test_delete_category_existing_and_not_found",
   "backend/tests/test_api_integration.py::test_flow_create_category_and_product_listing",
+  "backend/tests/test_api_integration.py::test_get_category_by_id_existing_and_not_found",
+  "backend/tests/test_api_integration.py::test_get_category_by_id_route_not_implemented",
+  "backend/tests/test_api_integration.py::test_get_product_by_id_existing_and_not_found",
+  "backend/tests/test_api_integration.py::test_post_product_invalid_category",
+  "backend/tests/test_api_integration.py::test_post_product_invalid_category_current_behavior",
+  "backend/tests/test_api_integration.py::test_put_product_update_fields",
+  "backend/tests/test_api_integration.py::test_update_category_name",
   "backend/tests/test_services.py::test_category_crud",
+  "backend/tests/test_services.py::test_category_delete_not_found",
+  "backend/tests/test_services.py::test_category_get_not_found",
+  "backend/tests/test_services.py::test_category_update_not_found",
+  "backend/tests/test_services.py::test_product_create_invalid_category_raises",
   "backend/tests/test_services.py::test_product_crud",
-  "e2e/test_e2e_playwright.py::test_e2e_create_category_product_and_list"
+  "backend/tests/test_services.py::test_product_get_not_found",
+  "backend/tests/test_services.py::test_product_update_multiple_fields",
+  "backend/tests/test_services.py::test_product_update_not_found",
+  "e2e/test_e2e_playwright.py::test_e2e_create_category_product_and_list",
+  "e2e/test_e2e_playwright.py::test_e2e_update_category_and_delete_product"
 ]

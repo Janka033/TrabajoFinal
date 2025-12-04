@@ -1,3 +1,4 @@
 {
-  "e2e/test_e2e_playwright.py::test_e2e_create_category_product_and_list": true
+  "backend/tests/test_api_integration.py::test_get_category_by_id_existing_and_not_found": true,
+  "backend/tests/test_api_integration.py::test_post_product_invalid_category": true
 }

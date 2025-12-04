@@ -24,6 +24,12 @@
         <button type="submit">Crear</button>
       </form>
       <ul id="cat-list"></ul>
+      <div style="margin-top:8px;">
+        <input type="number" id="cat-id-edit" placeholder="ID categoría" min="1" />
+        <input type="text" id="cat-name-edit" placeholder="Nuevo nombre" />
+        <button id="cat-update-btn">Actualizar categoría</button>
+        <button id="cat-delete-btn">Eliminar categoría</button>
+      </div>
     </div>
     <div>
       <h2>Crear producto</h2>
@@ -72,6 +78,7 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${p.id}</td><td>${p.name}</td><td>${p.description ?? ''}</td><td>${p.price}</td><td>${p.stock}</td><td>${p.category_id}</td>
                         <td>
+                          <button class="edit" data-id="${p.id}">Actualizar</button>
                           <button class="del" data-id="${p.id}">Eliminar</button>
                         </td>`;
         tbody.appendChild(tr);
@@ -80,6 +87,24 @@
         btn.addEventListener('click', async (e) => {
           const id = e.target.getAttribute('data-id');
           await fetchJSON(`${API}/products/${id}`, { method: 'DELETE' });
+          await loadProducts();
+        });
+      });
+      tbody.querySelectorAll('button.edit').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = parseInt(e.target.getAttribute('data-id'), 10);
+          const name = prompt('Nuevo nombre del producto:');
+          if (name === null) return;
+          const priceStr = prompt('Nuevo precio (deja vacío para no cambiar):');
+          const stockStr = prompt('Nuevo stock (deja vacío para no cambiar):');
+          const description = prompt('Nueva descripción (deja vacío para no cambiar):');
+          const payload = {};
+          if (name && name.trim()) payload.name = name.trim();
+          if (priceStr && priceStr.trim()) payload.price = parseFloat(priceStr);
+          if (stockStr && stockStr.trim()) payload.stock = parseInt(stockStr, 10);
+          if (description && description.trim()) payload.description = description.trim();
+          if (Object.keys(payload).length === 0) return;
+          await fetchJSON(`${API}/products/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
           await loadProducts();
         });
       });
@@ -106,6 +131,23 @@
       await fetchJSON(`${API}/products/`, { method: 'POST', body: JSON.stringify({ name, description, price, stock, category_id }) });
       e.target.reset();
       await loadProducts();
+    });
+
+    // Acciones de categoría: actualizar y eliminar por ID
+    document.getElementById('cat-update-btn').addEventListener('click', async () => {
+      const id = parseInt(document.getElementById('cat-id-edit').value, 10);
+      const name = document.getElementById('cat-name-edit').value.trim();
+      if (!id || !name) { alert('Ingresa ID y nuevo nombre'); return; }
+      await fetchJSON(`${API}/categories/${id}`, { method: 'PUT', body: JSON.stringify({ name }) });
+      document.getElementById('cat-name-edit').value = '';
+      await loadCategories();
+    });
+
+    document.getElementById('cat-delete-btn').addEventListener('click', async () => {
+      const id = parseInt(document.getElementById('cat-id-edit').value, 10);
+      if (!id) { alert('Ingresa ID de categoría'); return; }
+      await fetchJSON(`${API}/categories/${id}`, { method: 'DELETE' });
+      await loadCategories();
     });
 
     (async () => {

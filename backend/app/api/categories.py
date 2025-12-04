@@ -46,3 +46,15 @@ def delete_category(category_id: int, db: Session = Depends(get_db)):
     ok = service.delete(category_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Category not found")
+
+
+@router.put("/{category_id}", response_model=CategoryRead)
+def update_category(category_id: int, payload: CategoryCreate, db: Session = Depends(get_db)):
+    """
+    Actualiza el nombre de la categoría.
+    """
+    service = CategoryService(db)
+    cat = service.update(category_id, name=payload.name)
+    if not cat:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return cat

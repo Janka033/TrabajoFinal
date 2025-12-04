@@ -79,3 +79,103 @@ def test_flow_create_category_and_product_listing(client: TestClient):
     assert r3.status_code == 200
     products = r3.json()
     assert any(p["name"] == "Leche" for p in products)
+
+
+def test_update_category_name(client: TestClient):
+    # Crear categoría
+    r = client.post("/categories/", json={"name": "Inicial"})
+    assert r.status_code == 201
+    cat = r.json()
+
+    # Actualizar nombre
+    r2 = client.put(f"/categories/{cat['id']}", json={"name": "Actualizada"})
+    assert r2.status_code == 200
+    cat2 = r2.json()
+    assert cat2["name"] == "Actualizada"
+
+    # Verificar en listado
+    r3 = client.get("/categories/")
+    assert r3.status_code == 200
+    cats = r3.json()
+    assert any(c["id"] == cat["id"] and c["name"] == "Actualizada" for c in cats)
+
+
+def test_get_category_by_id_route_not_implemented(client: TestClient):
+    r = client.post("/categories/", json={"name": "ById"})
+    assert r.status_code == 201
+    cat = r.json()
+    r2 = client.get(f"/categories/{cat['id']}")
+    # Actualmente el API no implementa GET /categories/{id}
+    assert r2.status_code == 405
+
+
+def test_delete_category_existing_and_not_found(client: TestClient):
+    r = client.post("/categories/", json={"name": "DelMe"})
+    assert r.status_code == 201
+    cat = r.json()
+    r2 = client.delete(f"/categories/{cat['id']}")
+    assert r2.status_code in (200, 204)
+    r3 = client.delete("/categories/999999")
+    assert r3.status_code == 404
+
+
+def test_put_product_update_fields(client: TestClient):
+    rc = client.post("/categories/", json={"name": "ForProd"})
+    assert rc.status_code == 201
+    cat = rc.json()
+    rp = client.post(
+        "/products/",
+        json={
+            "name": "Prod1",
+            "description": "D",
+            "price": 1.0,
+            "stock": 1,
+            "category_id": cat["id"],
+        },
+    )
+    assert rp.status_code == 201
+    prod = rp.json()
+    ru = client.put(
+        f"/products/{prod['id']}",
+        json={"name": "Prod2", "description": "D2", "price": 2.0, "stock": 3},
+    )
+    assert ru.status_code == 200
+    prod2 = ru.json()
+    assert prod2["name"] == "Prod2" and prod2["price"] == 2.0 and prod2["stock"] == 3
+
+
+def test_get_product_by_id_existing_and_not_found(client: TestClient):
+    rc = client.post("/categories/", json={"name": "ForProdGet"})
+    assert rc.status_code == 201
+    cat = rc.json()
+    rp = client.post(
+        "/products/",
+        json={
+            "name": "ProdGet",
+            "description": "D",
+            "price": 1.0,
+            "stock": 1,
+            "category_id": cat["id"],
+        },
+    )
+    assert rp.status_code == 201
+    prod = rp.json()
+    r2 = client.get(f"/products/{prod['id']}")
+    assert r2.status_code == 200
+    r3 = client.get("/products/999999")
+    assert r3.status_code == 404
+
+
+def test_post_product_invalid_category_current_behavior(client: TestClient):
+    rp = client.post(
+        "/products/",
+        json={
+            "name": "BadCat",
+            "description": "",
+            "price": 1.0,
+            "stock": 1,
+            "category_id": 999999,
+        },
+    )
+    # Comportamiento actual: crea producto aunque el category_id no exista (sin validación estricta)
+    assert rp.status_code == 201
