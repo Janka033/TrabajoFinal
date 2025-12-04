@@ -1,0 +1,57 @@
+name: TrabajoFinal
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Lint (Flake8)
+        run: flake8 backend/app
+
+      - name: Security (Bandit)
+        run: bandit -r backend/app
+
+      - name: Unit + Integration tests
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: root
+          DB_PASSWORD: ''
+          DB_NAME: inventario
+        run: |
+          pytest -q backend/tests
+
+      - name: Start API for E2E
+        run: |
+          uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 &
+          sleep 3
+
+      - name: Serve frontend
+        run: |
+          python -m http.server 5500 -d . &
+          sleep 2
+
+      - name: E2E tests
+        run: |
+          pytest -q e2e/test_e2e_playwright.py
+
+      - name: All good
+        run: echo OK

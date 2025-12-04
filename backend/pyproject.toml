@@ -1,0 +1,18 @@
+[project]
+name = "inventario-fastapi"
+version = "0.1.0"
+description = "Sistema de gestión de inventario (FastAPI + MySQL)"
+requires-python = ">=3.10"
+
+[tool.poetry]
+# If using Poetry later; placeholder
+
+[tool.black]
+line-length = 100
+
+[tool.flake8]
+max-line-length = 100
+ignore = ["E203", "W503"]
+
+[tool.bandit]
+# Default config

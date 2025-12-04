@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Inventario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; max-width: 900px; margin: 20px auto; }
+    form { margin: 10px 0; display: grid; gap: 8px; grid-template-columns: 1fr 1fr 1fr 1fr; }
+    form#cat-form { grid-template-columns: 2fr 1fr; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    button { padding: 8px 12px; }
+  </style>
+</head>
+<body>
+  <h1>Gestión de Inventario</h1>
+  <div class="row">
+    <div>
+      <h2>Crear categoría</h2>
+      <form id="cat-form">
+        <input type="text" id="cat-name" placeholder="Nombre" required />
+        <button type="submit">Crear</button>
+      </form>
+      <ul id="cat-list"></ul>
+    </div>
+    <div>
+      <h2>Crear producto</h2>
+      <form id="prod-form">
+        <input type="text" id="prod-name" placeholder="Nombre" required />
+        <input type="text" id="prod-desc" placeholder="Descripción" />
+        <input type="number" id="prod-price" placeholder="Precio" step="0.01" min="0" required />
+        <input type="number" id="prod-stock" placeholder="Stock" min="0" required />
+        <select id="prod-category" required></select>
+        <button type="submit">Crear</button>
+      </form>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Stock</th><th>Categoría</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="products-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://127.0.0.1:8000';
+
+    async function fetchJSON(url, opts) {
+      const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      if (!res.ok) throw new Error(await res.text());
+      return res.status === 204 ? null : res.json();
+    }
+
+    async function loadCategories(){
+      const cats = await fetchJSON(`${API}/categories/`);
+      const list = document.getElementById('cat-list'); list.innerHTML = '';
+      const sel = document.getElementById('prod-category'); sel.innerHTML = '';
+      cats.forEach(c => {
+        const li = document.createElement('li'); li.textContent = `${c.id} - ${c.name}`; list.appendChild(li);
+        const opt = document.createElement('option'); opt.value = c.id; opt.textContent = c.name; sel.appendChild(opt);
+      });
+    }
+
+    async function loadProducts(){
+      const products = await fetchJSON(`${API}/products/`);
+      const tbody = document.getElementById('products-body'); tbody.innerHTML = '';
+      products.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.id}</td><td>${p.name}</td><td>${p.description ?? ''}</td><td>${p.price}</td><td>${p.stock}</td><td>${p.category_id}</td>
+                        <td>
+                          <button class="del" data-id="${p.id}">Eliminar</button>
+                        </td>`;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll('button.del').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.target.getAttribute('data-id');
+          await fetchJSON(`${API}/products/${id}`, { method: 'DELETE' });
+          await loadProducts();
+        });
+      });
+    }
+
+    // deleteProduct inlined with event listeners
+
+    document.getElementById('cat-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const name = document.getElementById('cat-name').value.trim();
+      if (!name) return;
+      await fetchJSON(`${API}/categories/`, { method: 'POST', body: JSON.stringify({ name }) });
+      document.getElementById('cat-name').value='';
+      await loadCategories();
+    });
+
+    document.getElementById('prod-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const name = document.getElementById('prod-name').value.trim();
+      const description = document.getElementById('prod-desc').value.trim();
+      const price = parseFloat(document.getElementById('prod-price').value);
+      const stock = parseInt(document.getElementById('prod-stock').value, 10);
+      const category_id = parseInt(document.getElementById('prod-category').value, 10);
+      await fetchJSON(`${API}/products/`, { method: 'POST', body: JSON.stringify({ name, description, price, stock, category_id }) });
+      e.target.reset();
+      await loadProducts();
+    });
+
+    (async () => {
+      try {
+        await loadCategories();
+        await loadProducts();
+      } catch (err) {
+        console.error(err);
+        alert('No se pudo cargar datos. ¿API corriendo en 127.0.0.1:8000?');
+      }
+    })();
+  </script>
+</body>
+</html>
