@@ -4,56 +4,123 @@
   <meta charset="utf-8" />
   <title>Inventario</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: system-ui, Arial, sans-serif; max-width: 900px; margin: 20px auto; }
-    form { margin: 10px 0; display: grid; gap: 8px; grid-template-columns: 1fr 1fr 1fr 1fr; }
-    form#cat-form { grid-template-columns: 2fr 1fr; }
-    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    button { padding: 8px 12px; }
+    :root {
+      --bg: #0b0f1a;
+      --card: #121826;
+      --muted: #8b94a9;
+      --text: #e6eaf2;
+      --primary: #7c5cff;
+      --primary-600: #6a4aff;
+      --primary-700: #5b3aff;
+      --danger: #ff5c7c;
+      --danger-700: #e24a69;
+      --success: #4ad1a1;
+      --border: #1e2433;
+    }
+
+    * { box-sizing: border-box; }
+    body { font-family: Inter, system-ui, Arial, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+    header.app-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(11,15,26,0.8); backdrop-filter: blur(8px); }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand .logo { font-size: 20px; }
+    .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; display: grid; grid-template-columns: 1fr; gap: 24px; }
+    /* Mantener una sola columna para centrar mejor el contenido */
+    .card { background: linear-gradient(180deg, var(--card), #0e1422); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+    .actions { display: flex; gap: 8px; }
+    .form-grid { display: grid; gap: 10px; grid-template-columns: repeat(6, 1fr); padding: 14px; }
+    .form-grid .input { grid-column: span 2; }
+    .form-grid .input#prod-desc { grid-column: span 3; }
+    .form-grid button { grid-column: span 1; }
+    .input, select { width: 100%; padding: 10px 12px; border-radius: 10px; background: #0b1220; border: 1px solid var(--border); color: var(--text); outline: none; }
+    .input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,92,255,0.15); }
+    .btn { padding: 12px 16px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; font-weight: 600; font-size: 14px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-600); }
+    .btn-secondary { background: #2b3a67; color: #ffffff; border-color: #3a4a7a; }
+    .btn-secondary:hover { background: #35477a; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: var(--danger-700); }
+    .badge { padding: 6px 10px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); }
+    .badge-ok { background: rgba(74,209,161,0.12); color: var(--success); border-color: rgba(74,209,161,0.4); }
+    .badge-error { background: rgba(255,92,124,0.12); color: var(--danger); border-color: rgba(255,92,124,0.4); }
+    .badge-offline { background: rgba(139,148,169,0.12); color: var(--muted); border-color: rgba(139,148,169,0.4); }
+    .list { list-style: none; padding: 12px 14px; margin: 0; display: grid; gap: 8px; }
+    .list-item { display: flex; align-items: center; justify-content: space-between; background: #0b1220; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+    .inline-actions { display: flex; gap: 8px; }
+    .table-wrapper { padding: 12px; display: flex; justify-content: center; }
+    table.table { width: 100%; max-width: 980px; border-collapse: separate; border-spacing: 0 8px; }
+    table.table th, table.table td { border-bottom: 1px solid var(--border); padding: 12px; text-align: left; overflow: visible; background: #0b1220; }
+    table.table td .btn { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    table.table td:last-child, table.table th:last-child { white-space: nowrap; text-align: center; width: 220px; }
+    table.table thead th { color: var(--muted); font-weight: 600; }
   </style>
 </head>
 <body>
-  <h1>Gestión de Inventario</h1>
-  <div class="row">
-    <div>
-      <h2>Crear categoría</h2>
-      <form id="cat-form">
-        <input type="text" id="cat-name" placeholder="Nombre" required />
-        <button type="submit">Crear</button>
-      </form>
-      <ul id="cat-list"></ul>
-      <div style="margin-top:8px;">
-        <input type="number" id="cat-id-edit" placeholder="ID categoría" min="1" />
-        <input type="text" id="cat-name-edit" placeholder="Nuevo nombre" />
-        <button id="cat-update-btn">Actualizar categoría</button>
-        <button id="cat-delete-btn">Eliminar categoría</button>
+  <header class="app-header">
+    <div class="brand"><span class="logo">📦</span><h1 style="margin:0; font-size: 18px;">Inventario</h1></div>
+    <div class="status"><span id="api-status" class="badge">API: ...</span></div>
+  </header>
+  <main class="container">
+    <section class="card">
+      <div class="card-header">
+        <h2 style="margin:0; font-size: 16px;">Categorías</h2>
+        <!-- Botón de refresco eliminado -->
       </div>
-    </div>
-    <div>
-      <h2>Crear producto</h2>
-      <form id="prod-form">
-        <input type="text" id="prod-name" placeholder="Nombre" required />
-        <input type="text" id="prod-desc" placeholder="Descripción" />
-        <input type="number" id="prod-price" placeholder="Precio" step="0.01" min="0" required />
-        <input type="number" id="prod-stock" placeholder="Stock" min="0" required />
-        <select id="prod-category" required></select>
-        <button type="submit">Crear</button>
+      <form id="cat-form" class="form-grid">
+        <input type="text" id="cat-name" class="input" placeholder="Nombre de la categoría" required />
+        <button type="submit" class="btn btn-primary">Crear categoría</button>
       </form>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Stock</th><th>Categoría</th><th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="products-body"></tbody>
-      </table>
-    </div>
-  </div>
+      <ul id="cat-list" class="list"></ul>
+      <div style="padding: 0 14px 14px; display:grid; gap:10px; grid-template-columns: 1fr 2fr auto auto;">
+        <input type="number" id="cat-id-edit" class="input" placeholder="ID categoría" min="1" />
+        <input type="text" id="cat-name-edit" class="input" placeholder="Nuevo nombre" />
+        <button id="cat-update-btn" class="btn btn-secondary">Actualizar</button>
+        <button id="cat-delete-btn" class="btn btn-danger">Eliminar</button>
+      </div>
+    </section>
 
+    <section class="card">
+      <div class="card-header">
+        <h2 style="margin:0; font-size: 16px;">Productos</h2>
+        <!-- Botón de refresco eliminado -->
+      </div>
+      <form id="prod-form" class="form-grid">
+        <input type="text" id="prod-name" class="input" placeholder="Nombre" required />
+        <input type="text" id="prod-desc" class="input" placeholder="Descripción" />
+        <input type="number" id="prod-price" class="input" placeholder="Precio" step="0.01" min="0" required />
+        <input type="number" id="prod-stock" class="input" placeholder="Stock" min="0" required />
+        <select id="prod-category" class="input" required></select>
+        <button type="submit" class="btn btn-primary">Crear producto</button>
+      </form>
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Stock</th><th>Categoría</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="products-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
   <script>
     const API = 'http://127.0.0.1:8000';
+
+    async function updateApiStatus(){
+      try {
+        const r = await fetch(`${API}/health`);
+        if (r.ok) { document.getElementById('api-status').textContent = 'API: OK'; document.getElementById('api-status').className = 'badge badge-ok'; }
+        else { document.getElementById('api-status').textContent = 'API: Error'; document.getElementById('api-status').className = 'badge badge-error'; }
+      } catch (e) {
+        document.getElementById('api-status').textContent = 'API: Offline'; document.getElementById('api-status').className = 'badge badge-offline';
+      }
+    }
 
     async function fetchJSON(url, opts) {
       const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
@@ -78,8 +145,8 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${p.id}</td><td>${p.name}</td><td>${p.description ?? ''}</td><td>${p.price}</td><td>${p.stock}</td><td>${p.category_id}</td>
                         <td>
-                          <button class="edit" data-id="${p.id}">Actualizar</button>
-                          <button class="del" data-id="${p.id}">Eliminar</button>
+                          <button class="btn btn-secondary edit" data-id="${p.id}" title="Actualizar">Actualizar</button>
+                          <button class="btn btn-danger del" data-id="${p.id}" title="Eliminar">Eliminar</button>
                         </td>`;
         tbody.appendChild(tr);
       });
@@ -152,6 +219,7 @@
 
     (async () => {
       try {
+        await updateApiStatus();
         await loadCategories();
         await loadProducts();
       } catch (err) {
@@ -159,6 +227,8 @@
         alert('No se pudo cargar datos. ¿API corriendo en 127.0.0.1:8000?');
       }
     })();
+
+    // Botones de refresco eliminados
   </script>
 </body>
 </html>
