@@ -25,30 +25,33 @@ def test_e2e_create_category_product_and_list():
         page.fill('#prod-stock', '5')
         # Ensure select exists
         page.wait_for_selector('#prod-category', state='visible', timeout=10000)
-        # Fetch categories and populate select, then select by value for reliability in CI
-        cat_id = page.evaluate(
-            "async () => {\n"
-            "  const res = await fetch('http://127.0.0.1:8000/categories/');\n"
-            "  const cats = await res.json();\n"
-            "  let cat = cats.find(c => c.name === 'E2E-Cat');\n"
-            "  if (!cat) {\n"
-            "    // create if missing\n"
-            "    const resCreate = await fetch('http://127.0.0.1:8000/categories/', {\n"
-            "      method: 'POST', headers: { 'Content-Type': 'application/json' },\n"
-            "      body: JSON.stringify({ name: 'E2E-Cat' })\n"
-            "    });\n"
-            "    cat = await resCreate.json();\n"
-            "  }\n"
+        # Backend URL (default localhost)
+        backend_url = os.getenv("BACKEND_URL") or "http://127.0.0.1:8000"
+        # Use Playwright's request API to avoid browser CORS/Fetch issues in CI
+        res = page.request.get(f"{backend_url}/categories/")
+        cats = res.json()
+        cat = next((c for c in cats if c.get("name") == "E2E-Cat"), None)
+        if not cat:
+            res_create = page.request.post(
+                f"{backend_url}/categories/",
+                data={"name": "E2E-Cat"},
+                headers={"Content-Type": "application/json"},
+            )
+            cat = res_create.json()
+        cat_id = str(cat.get("id"))
+        # Inject option into select if missing
+        page.evaluate(
+            "(id, text) => {\n"
             "  const sel = document.querySelector('#prod-category');\n"
-            "  const exists = [...sel.querySelectorAll('option')].some(o => o.value === String(cat.id));\n"
+            "  const exists = [...sel.querySelectorAll('option')].some(o => o.value === id);\n"
             "  if (!exists) {\n"
             "    const opt = document.createElement('option');\n"
-            "    opt.value = String(cat.id);\n"
-            "    opt.textContent = cat.name;\n"
+            "    opt.value = id; opt.textContent = text;\n"
             "    sel.appendChild(opt);\n"
             "  }\n"
-            "  return String(cat.id);\n"
-            "}"
+            "}",
+            cat_id,
+            cat.get("name"),
         )
         page.select_option('#prod-category', value=cat_id)
         page.click('#prod-form button')

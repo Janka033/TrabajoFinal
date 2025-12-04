@@ -43,6 +43,7 @@ jobs:
         run: |
           uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 &
           sleep 3
+          echo "BACKEND_URL=http://127.0.0.1:8000" >> $GITHUB_ENV
 
       - name: Serve frontend
         run: |
@@ -50,6 +51,9 @@ jobs:
           sleep 2
 
       - name: E2E tests
+        env:
+          FRONTEND_URL: http://127.0.0.1:5500/frontend/index.html
+          BACKEND_URL: ${{ env.BACKEND_URL }}
         run: |
           pytest -q e2e/test_e2e_playwright.py
 
