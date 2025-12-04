@@ -17,7 +17,7 @@ class ProductService:
         return self.db.query(Product).all()
 
     def get(self, product_id: int) -> Product | None:
-        return self.db.query(Product).get(product_id)
+        return self.db.get(Product, product_id)
 
     def update(self, product_id: int, **kwargs) -> Product | None:
         prod = self.get(product_id)

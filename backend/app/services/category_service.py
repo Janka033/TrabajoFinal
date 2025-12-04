@@ -17,7 +17,7 @@ class CategoryService:
         return self.db.query(Category).all()
 
     def get(self, category_id: int) -> Category | None:
-        return self.db.query(Category).get(category_id)
+        return self.db.get(Category, category_id)
 
     def delete(self, category_id: int) -> bool:
         cat = self.get(category_id)

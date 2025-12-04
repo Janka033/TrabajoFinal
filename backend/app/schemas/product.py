@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from pydantic import ConfigDict
 
 
 class ProductCreate(BaseModel):
@@ -25,5 +26,6 @@ class ProductRead(BaseModel):
     stock: int
     category_id: int
 
-    class Config:
-        from_attributes = True
+    # Pydantic v2 config
+    model_config = ConfigDict(from_attributes=True)
+    
