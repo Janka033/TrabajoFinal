@@ -28,4 +28,3 @@ class ProductRead(BaseModel):
 
     # Pydantic v2 config
     model_config = ConfigDict(from_attributes=True)
-    
