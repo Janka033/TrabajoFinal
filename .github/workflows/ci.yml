@@ -29,17 +29,21 @@ jobs:
           pip install -r backend/requirements.txt || true
           pip install -r requirements.txt || true
 
-      - name: Start backend (uvicorn) in background
+      - name: Ensure app package exists
+        run: |
+          test -f backend/app/__init__.py || echo > backend/app/__init__.py
+
+      - name: Start backend (uvicorn) in background (SQLite fallback)
         env:
           PORT: 8000
+          # No set DATABASE_URL -> core.py fallback to sqlite:///./ci.db
         run: |
-          # Use --app-dir to put 'backend' on sys.path and import 'app.main:app'
           nohup python -m uvicorn app.main:app --host 127.0.0.1 --port ${PORT} --app-dir backend > backend.log 2>&1 &
           echo $! > backend.pid
 
       - name: Wait for backend to be ready
         run: |
-          for i in {1..40}; do
+          for i in {1..60}; do
             if curl -sSf http://127.0.0.1:8000/docs >/dev/null; then
               echo "Backend is up"
               exit 0
